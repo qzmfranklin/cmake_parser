@@ -2,7 +2,7 @@
 
 import unittest
 
-import _token
+import tok
 
 
 class TestArgumentClasses(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestArgumentClasses(unittest.TestCase):
             '[[foo\\bar$foo\n\n${var}]]': 'foo\\bar$foo\n\n${var}',
         }
         for orig_text, value in data.items():
-            arg = _token.BracketArgument(orig_text)
+            arg = tok.BracketArgument(orig_text)
             self.assertEqual(orig_text, arg.orig_text)
             self.assertEqual(value, arg.value, msg=orig_text)
 
@@ -34,7 +34,7 @@ class TestArgumentClasses(unittest.TestCase):
             r'"\v"': '\v',
         }
         for orig_text, value in data.items():
-            arg = _token.QuotedArgument(orig_text)
+            arg = tok.QuotedArgument(orig_text)
             self.assertEqual(orig_text, arg.orig_text)
             self.assertEqual(value, arg.value, msg=orig_text)
 
@@ -45,7 +45,7 @@ class TestArgumentClasses(unittest.TestCase):
             r'Escaped\;Semicolon': 'Escaped;Semicolon',
         }
         for orig_text, value in data.items():
-            arg = _token.UnquotedArgument(orig_text)
+            arg = tok.UnquotedArgument(orig_text)
             self.assertEqual(orig_text, arg.orig_text)
             self.assertEqual(value, arg.value, msg=orig_text)
 

@@ -14,7 +14,7 @@ import io
 import re
 
 import char_stream
-import _token
+import tok
 
 
 def is_whitespace(char):
@@ -126,11 +126,11 @@ class Tokenizer(object):
 
         Clear internal the symbol but do not touch the input stream.
 
-        Only subclasses of _token.Token will be processed.
+        Only subclasses of tok.Token will be processed.
 
         This is an internal method and MUST NOT be used publicly.
         '''
-        assert issubclass(clazz, _token.Token)
+        assert issubclass(clazz, tok.Token)
         retval = clazz(self._orig_text)
         self._orig_text = ''
         return retval
@@ -188,10 +188,10 @@ class Tokenizer(object):
                 self._state = _State.QuotedArgument
             elif curr == '(':
                 self._push()
-                return self._emit(_token.Bra)
+                return self._emit(tok.Bra)
             elif curr == ')':
                 self._push()
-                return self._emit(_token.Ket)
+                return self._emit(tok.Ket)
             elif is_whitespace(curr):
                 self._next()
             else:
@@ -212,7 +212,7 @@ class Tokenizer(object):
             elif curr == '\n' or curr is None:
                 self._next()
                 self._state = _State.Start
-                return self._emit(_token.Comment)
+                return self._emit(tok.Comment)
             else:
                 self._push()
                 self._state = _State.CommentLine
@@ -224,7 +224,7 @@ class Tokenizer(object):
             if curr == '\n' or curr is None:
                 self._next()
                 self._state = _State.Start
-                return self._emit(_token.Comment)
+                return self._emit(tok.Comment)
             else:
                 self._push()
                 self._state = _State.CommentLine
@@ -244,7 +244,7 @@ class Tokenizer(object):
             elif curr == '\n' or curr is None:
                 self._next()
                 self._state = _State.Start
-                return self._emit(_token.Comment)
+                return self._emit(tok.Comment)
             else:
                 self._push()
                 self._state = _State.CommentLine
@@ -262,7 +262,7 @@ class Tokenizer(object):
             elif curr == '\n' or curr is None:
                 self._next()
                 self._state = _State.Start
-                return self._emit(_token.Comment)
+                return self._emit(tok.Comment)
             else:
                 self._push()
         elif self._state == _State.CommentBracketClose:
@@ -280,11 +280,11 @@ class Tokenizer(object):
                     self.__close_block_length == self.__open_block_length:
                 self._push()
                 self._state = _State.Start
-                return self._emit(_token.Comment)
+                return self._emit(tok.Comment)
             elif curr == '\n' or curr is None:
                 self._next()
                 self._state = _State.Start
-                return self._emit(_token.Comment)
+                return self._emit(tok.Comment)
             else:
                 self._push()
                 self._state = _State.CommentBracketContent
@@ -327,7 +327,7 @@ class Tokenizer(object):
                     self.__close_block_length == self.__open_block_length:
                 self._push()
                 self._state = _State.Start
-                return self._emit(_token.BracketArgument)
+                return self._emit(tok.BracketArgument)
             else:
                 self._push()
                 self._state = _State.BracketArgumentContent
@@ -343,7 +343,7 @@ class Tokenizer(object):
             elif curr == '"':
                 self._push()
                 self._state = _State.Start
-                return self._emit(_token.QuotedArgument)
+                return self._emit(tok.QuotedArgument)
             else:
                 self._push()
         elif self._state == _State.QuotedArgumentBackslash:
@@ -375,7 +375,7 @@ class Tokenizer(object):
             elif is_whitespace(curr) or \
                     (curr and curr in '()#"'):
                 self._state = _State.Start
-                return self._emit(_token.UnquotedArgument)
+                return self._emit(tok.UnquotedArgument)
             else:
                 self._push()
         elif self._state == _State.UnquotedArgumentEscape:

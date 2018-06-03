@@ -2,9 +2,10 @@ licenses(['notice'])
 package(default_visibility=['//visibility:public'])
 
 LIBS = [
-    '_token',
+    'ast',
     'char_stream',
-    'tokenizer',
+    'lexer',
+    'tok',
 ]
 
 py_library(

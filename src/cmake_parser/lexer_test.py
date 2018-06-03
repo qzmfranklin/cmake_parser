@@ -6,8 +6,8 @@ import pathlib
 import textwrap
 import unittest
 
-import _token
-import tokenizer
+import lexer
+import tok
 
 THIS_DIR = pathlib.Path(__file__).resolve().parent
 DATA_DIR = THIS_DIR / 'test_data'
@@ -18,13 +18,13 @@ class TestCheckers(unittest.TestCase):
     def test_is_whitespace(self):
         data = ' \t\v\r\n'
         for char in data:
-            actual = tokenizer.is_whitespace(char)
+            actual = lexer.is_whitespace(char)
             self.assertEqual(actual, True, msg=ord(char))
 
     def test_is_quoted_character(self):
         data = ' \t\v\r\n\\#()"'
         for char in data:
-            actual = tokenizer.is_quoted_character(char)
+            actual = lexer.is_quoted_character(char)
             self.assertEqual(actual, False, msg=ord(char))
 
 
@@ -34,17 +34,17 @@ class TestTokenizer(unittest.TestCase):
         linetext = '# one-line comment'
         data = {
             linetext: [
-                _token.Comment(linetext),
+                tok.Comment(linetext),
             ],
             linetext + '\n': [
-                _token.Comment(linetext),
+                tok.Comment(linetext),
             ],
             '\n'.join([linetext * 2, linetext]) + '\n':
-            [_token.Comment(linetext * 2),
-             _token.Comment(linetext)],
+            [tok.Comment(linetext * 2),
+             tok.Comment(linetext)],
         }
         for text, tokens in data.items():
-            g = tokenizer.Tokenizer.from_string(text)
+            g = lexer.Tokenizer.from_string(text)
             for actual, expected in zip(g.__iter__(), tokens):
                 self.assertEqual(actual, expected)
 
@@ -52,26 +52,26 @@ class TestTokenizer(unittest.TestCase):
         linetext = '#[[ bracket comment ]]'
         data = {
             linetext: [
-                _token.Comment(linetext),
+                tok.Comment(linetext),
             ],
             linetext + '\n': [
-                _token.Comment(linetext),
+                tok.Comment(linetext),
             ],
             linetext * 2: [
-                _token.Comment(linetext),
-                _token.Comment(linetext),
+                tok.Comment(linetext),
+                tok.Comment(linetext),
             ],
             '#[==[a\n#a': [
-                _token.Comment('#[==[a'),
-                _token.Comment('#a'),
+                tok.Comment('#[==[a'),
+                tok.Comment('#a'),
             ],
             '#[=[ foo ]=] \t#[=[a]=]': [
-                _token.Comment('#[=[ foo ]=]'),
-                _token.Comment('#[=[a]=]'),
+                tok.Comment('#[=[ foo ]=]'),
+                tok.Comment('#[=[a]=]'),
             ],
         }
         for text, tokens in data.items():
-            g = tokenizer.Tokenizer.from_string(text)
+            g = lexer.Tokenizer.from_string(text)
             for actual, expected in zip(g.__iter__(), tokens):
                 self.assertEqual(actual, expected)
 
@@ -89,89 +89,89 @@ class TestTokenizer(unittest.TestCase):
         )
         data = {
             blocktext: [
-                _token.BracketArgument(blocktext),
+                tok.BracketArgument(blocktext),
             ],
             '[[foo]]': [
-                _token.BracketArgument('[[foo]]'),
+                tok.BracketArgument('[[foo]]'),
             ],
         }
         for text, tokens in data.items():
-            g = tokenizer.Tokenizer.from_string(text)
+            g = lexer.Tokenizer.from_string(text)
             for actual, expected in zip(g.__iter__(), tokens):
                 self.assertEqual(actual, expected)
 
     def test_quoted_argument(self):
         data = {
             '"foo"': [
-                _token.QuotedArgument('"foo"'),
+                tok.QuotedArgument('"foo"'),
             ],
             r'"\r"': [
-                _token.QuotedArgument(r'"\r"'),
+                tok.QuotedArgument(r'"\r"'),
             ],
             r'"\t"': [
-                _token.QuotedArgument(r'"\t"'),
+                tok.QuotedArgument(r'"\t"'),
             ],
             r'"\n"': [
-                _token.QuotedArgument(r'"\n"'),
+                tok.QuotedArgument(r'"\n"'),
             ],
             r'"\;"': [
-                _token.QuotedArgument(r'"\;"'),
+                tok.QuotedArgument(r'"\;"'),
             ],
             r'"\ "': [
-                _token.QuotedArgument(r'"\ "'),
+                tok.QuotedArgument(r'"\ "'),
             ],
             '"foo;bar"': [
-                _token.QuotedArgument('"foo;bar"'),
+                tok.QuotedArgument('"foo;bar"'),
             ],
             '"foo""bar"': [
-                _token.QuotedArgument('"foo"'),
-                _token.QuotedArgument('"bar"'),
+                tok.QuotedArgument('"foo"'),
+                tok.QuotedArgument('"bar"'),
             ],
             '"foo\\\n bar"': [
-                _token.QuotedArgument('"foo\\\n bar"'),
+                tok.QuotedArgument('"foo\\\n bar"'),
             ],
         }
         for text, tokens in data.items():
-            g = tokenizer.Tokenizer.from_string(text)
+            g = lexer.Tokenizer.from_string(text)
             for actual, expected in zip(g.__iter__(), tokens):
                 self.assertEqual(actual, expected)
 
     def test_unquoted_argument(self):
         data = {
             'foo': [
-                _token.UnquotedArgument('foo'),
+                tok.UnquotedArgument('foo'),
             ],
             r'\r': [
-                _token.UnquotedArgument(r'\r'),
+                tok.UnquotedArgument(r'\r'),
             ],
             r'\t': [
-                _token.UnquotedArgument(r'\t'),
+                tok.UnquotedArgument(r'\t'),
             ],
             r'\n': [
-                _token.UnquotedArgument(r'\n'),
+                tok.UnquotedArgument(r'\n'),
             ],
             r'\;': [
-                _token.UnquotedArgument(r'\;'),
+                tok.UnquotedArgument(r'\;'),
             ],
             r'\ ': [
-                _token.UnquotedArgument(r'\ '),
+                tok.UnquotedArgument(r'\ '),
             ],
             'foo;bar;': [
-                _token.UnquotedArgument('foo'),
-                _token.UnquotedArgument('bar'),
+                tok.UnquotedArgument('foo'),
+                tok.UnquotedArgument('bar'),
             ]
         }
         for text, tokens in data.items():
-            g = tokenizer.Tokenizer.from_string(text)
+            g = lexer.Tokenizer.from_string(text)
             for actual, expected in zip(g.__iter__(), tokens):
                 self.assertEqual(actual, expected)
 
     def test_realfiles(self):
         for src_path in glob.glob(str(DATA_DIR / '*.txt')):
             toks_path = src_path[:-len('txt')] + 'toks'
-            g = tokenizer.Tokenizer.from_file(src_path)
+            g = lexer.Tokenizer.from_file(src_path)
             with open(str(toks_path), 'r') as f:
-                g = tokenizer.Tokenizer.from_file(src_path)
+                g = lexer.Tokenizer.from_file(src_path)
                 for expected, actual in zip(f, g):
                     expected = expected.rstrip('\n')
                     self.assertEqual(str(actual), expected, msg=src_path)
