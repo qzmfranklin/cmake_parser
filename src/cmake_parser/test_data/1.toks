@@ -1,0 +1,40 @@
+<Comment b'# https://cmake.org/cmake-tutorial'>
+<UnquotedArgument b'cmake_minimum_required'>
+<Bra b'('>
+<UnquotedArgument b'VERSION'>
+<UnquotedArgument b'2.6'>
+<Ket b')'>
+<UnquotedArgument b'project'>
+<Bra b'('>
+<UnquotedArgument b'Tutorial'>
+<Ket b')'>
+<Comment b'# The version number.'>
+<UnquotedArgument b'set'>
+<Bra b'('>
+<UnquotedArgument b'Tutorial_VERSION_MAJOR'>
+<UnquotedArgument b'1'>
+<Ket b')'>
+<UnquotedArgument b'set'>
+<Bra b'('>
+<UnquotedArgument b'Tutorial_VERSION_MINOR'>
+<UnquotedArgument b'0'>
+<Ket b')'>
+<Comment b'# configure a header file to pass some of the CMake settings'>
+<Comment b'# to the source code'>
+<UnquotedArgument b'configure_file'>
+<Bra b'('>
+<QuotedArgument b'"${PROJECT_SOURCE_DIR}/TutorialConfig.h.in"'>
+<QuotedArgument b'"${PROJECT_BINARY_DIR}/TutorialConfig.h"'>
+<Ket b')'>
+<Comment b'# add the binary tree to the search path for include files'>
+<Comment b'# so that we will find TutorialConfig.h'>
+<UnquotedArgument b'include_directories'>
+<Bra b'('>
+<QuotedArgument b'"${PROJECT_BINARY_DIR}"'>
+<Ket b')'>
+<Comment b'# add the executable'>
+<UnquotedArgument b'add_executable'>
+<Bra b'('>
+<UnquotedArgument b'Tutorial'>
+<UnquotedArgument b'tutorial.cxx'>
+<Ket b')'>

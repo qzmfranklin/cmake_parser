@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+'''
+Generate source files from configuation information.
+
+
+See docs/configure.rst.
+'''
+
+import argparse
+import inspect
+import os
+import pathlib
+
+from src.base.python import arg_parse
+from src.base.python import gentemplate
+from src.base.python import util
+
+ROOT_DIR = util.get_workspace()
+ALLOWED_TYPES = ['build', 'deploy']
+PY_SCRIPT_FILENAME_FORMAT = '__configure_%s__.py'
+
+
+def __get_config_funcs(py_path):
+    '''Get functions that are decorated by gentemplate.template().
+
+    :param py_path: The path to a python script whose filename matches that of
+        PY_SCRIPT_FILENAME_FORMAT.
+    :type py_path: pathlib.Path.
+
+    :yield: A non-binding function object that may be run to generate template
+        files.  See src.base.python.gentemplate.template for the whereabouts
+        about this returned function object.
+    '''
+    # Need to import using the full path.  However, that will return a
+    # Namespace object, where the actual function is buried inside.  For
+    # example, __import__(foo.bar.mod.func) will return a Namespace() object
+    # representing the 'foo' namespace.  Before getting the 'func' function,
+    # we have to traverse through the 'bar' namespace and the 'mod' module.
+    py_module_name = util.path_to_module(py_path.relative_to(ROOT_DIR))
+    namespace_names = py_module_name.split('.')[1:]
+    ns = __import__(py_module_name)  # pylint: disable=invalid-name
+    for namespace_name in namespace_names:
+        ns = getattr(ns, namespace_name)  # pylint: disable=invalid-name
+    for _, func in inspect.getmembers(ns, gentemplate.is_configure):
+        yield func
+
+
+def execute(args):  # pylint: disable=missing-docstring
+    types = args.types if args.types else ALLOWED_TYPES
+    for type in types:  # pylint: disable=redefined-builtin
+        py_script_filename = PY_SCRIPT_FILENAME_FORMAT % type
+        for root, _, _ in os.walk(str(ROOT_DIR)):
+            root = pathlib.Path(root)
+            py_path = root / py_script_filename
+            if py_path.is_file():
+                if args.verbose:
+                    print(py_path.relative_to(ROOT_DIR))
+                for func in __get_config_funcs(py_path):
+                    func(dry_run=args.dry_run, verbose=args.verbose)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=arg_parse.Formatter
+    )
+    parser.add_argument(
+        '-n',
+        '--dry-run',
+        action='store_true',
+        help='''List what files would be generated intead of generating
+        them.'''
+    )
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='store_true',
+        help='''Print more information.  This is primarily used for debugging
+        and inspection.'''
+    )
+    parser.add_argument(
+        'types',
+        choices=ALLOWED_TYPES,
+        nargs=argparse.REMAINDER,
+        help='''Space-separated list of types of files to generate.  Leaving
+        this field empty will generate all types of files.'''
+    )
+    args = parser.parse_args()
+    execute(args)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,67 @@
+---
+repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v1.2.3
+      hooks:
+          # Both end-of-file-fixer and trailing-whitespace are integrated into
+          # the purify-text hook.  Keeping these two here commented to allow
+          # easy fallback in case of failure.
+          #- id: end-of-file-fixer
+          #  name: end-of-file-fixer (add new-line character at EOF)
+          #- id: trailing-whitespace
+          #  name: trailing-whitespace (remove trailing white spaces)
+
+          - id: name-tests-test
+            name: name-tests-test (python tests conform to *_test.py)
+            exclude: ^tests/__configure.*py$
+          - id: forbid-new-submodules
+            name: forbid-new-submodules
+          - id: check-added-large-files
+            name: check-added-large-files (use git-lfs instead)
+          - id: check-case-conflict
+            name: check-case-conflict (unsafe for case-insensitive fs)
+          - id: check-executables-have-shebangs
+            name: check-executables-have-shebangs
+          - id: check-symlinks
+            name: check-symlinks (no broken symlinks)
+          - id: check-xml
+            name: check-xml (validate xml files)
+          - id: detect-private-key
+            name: detect-private-key (do not check in private keys)
+          - id: file-contents-sorter
+            name: file-contents-sorter (sort text files)
+          - id: no-commit-to-branch
+            name: no-commit-to-branch (use pull request instead)
+            args:
+                - -b
+                # TODO (zhongming): Change back to master once the migration is
+                # completed.
+                - master-lfs
+          - id: double-quote-string-fixer
+            name: double-quote-string-fixer (remove extraneous quotes)
+
+    # Use local hooks to ensure correct configuration.
+    # TODO (zhongming): Eventually migrate to remote hooks and custom hooks when
+    # the technologies mature.  Using local hooks adds burden to the host
+    # environment setup.
+    - repo: local
+      hooks:
+          # `yapf -i` formats the source file in-place but does not provide any
+          # diagnostics.  `pylint` provides diagnostics but does not format the
+          # code directly.  yapf should precede pylint to enable the best
+          # developer experience and coding quality.
+          #
+          # Running the following checks requires the host system to have the
+          # following python3 packages installed via pip3:
+          #       pip3 install -U pylint yapf
+          - id: yapf
+            name: yapf (format python code)
+            entry: python3 -m yapf -i
+            language: system
+            types: [python]
+
+          - id: pylint
+            name: pylint (lint python code)
+            entry: python3 -m pylint --rcfile=.pylintrc
+            language: system
+            types: [python]

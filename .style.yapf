@@ -1,0 +1,12 @@
+[style]
+indent_width = 4
+align_closing_bracket_with_visual_indent = true
+allow_multiline_dictionary_keys = false
+blank_line_before_nested_class_or_def = true
+coalesce_brackets = true
+column_limit = 80
+dedent_closing_brackets = true
+split_before_logical_operator = true
+split_penalty_excess_character = 999
+split_penalty_for_added_line_split = 0
+# join_multiple_lines = true

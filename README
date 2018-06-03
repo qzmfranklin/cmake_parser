@@ -1,0 +1,13 @@
+Implements a parser per the following specification:
+    https://cmake.org/cmake/help/v3.11/manual/cmake-language.7.html
+
+You can read the document for the lastest release here:
+    https://cmake.org/cmake/help/latest/manual/cmake-language.7.html
+
+1.  Install Bazel (https://bazel.build/)
+
+2.  Configure the runtime.
+    ./config
+
+3.  Run the tests:
+    bazel test src/...
